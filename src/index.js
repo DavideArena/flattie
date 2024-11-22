@@ -1,4 +1,12 @@
-function iter(output, nullish, sep, val, key) {
+function iter(output, val, options) {
+
+	const {
+		nullish,
+		sep,
+		key,
+		transformKey,
+	} = options || {};
+
 	var k, pfx = key ? (key + sep) : key;
 
 	if (val == null) {
@@ -6,20 +14,30 @@ function iter(output, nullish, sep, val, key) {
 	} else if (typeof val != 'object') {
 		output[key] = val;
 	} else if (Array.isArray(val)) {
-		for (k=0; k < val.length; k++) {
-			iter(output, nullish, sep, val[k], pfx + k);
+		for (k = 0; k < val.length; k++) {
+			iter(output, val[k], { nullish, sep, key: pfx + k, transformKey });
 		}
 	} else {
 		for (k in val) {
-			iter(output, nullish, sep, val[k], pfx + k);
+			iter(output, val[k], { nullish, sep, key: pfx + (transformKey ? transformKey(pfx, k) : k), transformKey });
 		}
 	}
 }
-
-export function flattie(input, glue, toNull) {
+export function flattie(input, glue, toNull, options = {}) {
 	var output = {};
+
+	if (options && options.transformKey && typeof options.transformKey !== 'function') {
+		throw new Error('value of options.transformKey must be a function returning a string');
+	}
+
 	if (typeof input == 'object') {
-		iter(output, !!toNull, glue || '.', input, '');
+		iter(output, input, {
+			nullish: !!toNull,
+			sep: (glue || ( glue == "" && options.allowGlueEmptyString )) ? glue : '.',
+			key: '',
+			transformKey: options.transformKey,
+		});
 	}
 	return output;
 }
+
