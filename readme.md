@@ -6,7 +6,7 @@ This module recursively squashes an Object/Array. The output is a flat object â€
 
 By default, the `.` character is used to glue/join layers' keys together. This is customizable.
 
-Every flatten key can be customized allowing any type of transformation.
+Every flatten key can be customized using a custom transformer function.
 
 Finally, by default, any keys with nullish values (`null` and `undefined`) are **not** included in the return object.
 
